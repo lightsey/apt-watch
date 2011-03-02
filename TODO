@@ -1,0 +1,16 @@
+Stuff to do before 1.0
+
+  - Better FAM usage: don't start reloading the cache/downloading just
+    because an atime changed.
+
+  - In fact, never do either of these while a global apt program is running.
+
+  - ssh tunneling
+
+  - Finish the README.
+
+  - Get some better icons to display the current status.
+
+  - At least don't run an auto-update or auto-upgrade while a sub-package-manager is running.
+
+  - Deal better with user actions during an update/etc.

@@ -1,0 +1,40 @@
+			 apt-watch 0.3.2 README
+		 Daniel Burrows <dburrows@debian.org>
+
+0) What is it?
+
+This is a applet (presently only for Gnome) to watch for updates to
+packages on your system.
+
+1) What good is it?
+
+This applet is meant primarily for users of stable Debian releases, so they
+can be informed when important upgrades to their system are available.  It
+takes the place of running "apt-get update" periodically to check for new
+packages.  It will pay particular attention to packages on security.debian.org.
+
+2) The version number looks low.  Is this program safe to use?
+
+While no program is bug-free, I certainly believe that apt-watch is
+usable on a day-to-day basis.  The low version number is more due to
+missing features than to instability in the present version.
+
+See TODO for a list of features to be added before 1.0.
+
+3) Why did you write a Gnome applet and not use the notification-area?
+
+As far as I know, the notification area doesn't support the stuff that the
+panel does automatically, such as having multiple instances of the program
+that don't step on each other's configuration, starting the program
+automatically on login, and so on.
+
+4) Why isn't there a KDE applet?
+
+Because I don't use KDE and I haven't had the time or motivation to
+write one.  In theory, it should be easier to write a KDE applet, but
+the Gnome applet was unpleasant enough for me right now.
+Contributions are welcome, of course.
+
+5) Why isn't there an X=(xfce/Notification Area/NeXTStep/Amiga/etc) frontend?
+
+4[KDE/X]

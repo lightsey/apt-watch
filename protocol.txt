@@ -1,0 +1,86 @@
+This file documents Version 1 of the apt-watch protocol.
+
+Communication between the applet and the slave process consists of a
+single byte message ID followed by data.  Message IDs are:
+
+FIRST PACKET: [i]
+  This is a string representation of the protocol version.  This must be
+  sent by both the applet and the slave before any other packet; once it
+  is set, normal communication proceeds.  If the protocol version of the
+  slave is incompatible with the protocol version of the client, the one
+  with a HIGHER version number should abort the communication (this is on
+  the assumption that the higher version number has more information about
+  compatibility issues)
+
+  Note that the FATALERROR message is guaranteed to be valid in any protocol
+  version and should be used to abort the connection.
+
+Applet -> slave:
+0	[]	Perform an update of the package lists.
+1	[]	Reload the package lists.
+2       [bs]	Attempt to become root and execute a command.  This is followed
+	        by a single byte, 0 or 1, indicating whether the command is to
+		be run in an xterm, and then a single string containing the
+		command to be executed (with no arguments)
+3	[s]	Send a reply to an authentication prompt.
+4	[]	Cancel an authentication prompt.
+5	[b]	Download all available updates.  If the argument is TRUE,
+		all updates will be downloaded; otherwise, only security
+		updates will be downloaded.
+
+6       []      Cancel an update (0) or download (5) that is in progress.
+
+		This command will be silently ignored if it is received
+		while an update or download is not in progress, and no
+		other command is valid while an update or download is in
+		progress. (sending any other command will result in
+		a fatal termination of the slave)
+
+		In other words: between the time you write() command 0
+		or 5 to the pipe, and the time that you receive a
+		completion reply, the only valid command to send to
+		the pipe is a 6.
+
+(close pipe)	Terminate.
+
+Slave -> applet, during authentication:
+64	[s]	 Prompt for a string without echo
+65	[s]	 Prompt for a string with echo
+66	[s]	 Display an error message
+67	[s]	 Display some other text
+
+128	[s]	 Authentication failure.
+129	[]	 Authentication succeeded.
+
+Slave -> applet, non-authentication
+68      [sfb]	 Sent when OpProgress::Update() would be called.
+		      The "packet" sent is:
+			  string Op;
+			  float Percent;
+			  bool MajorUpdate;
+69      []	 Sent when OpProgress::Done would be called.
+
+130	[]	 Slave initialized successfully; no upgrades available.
+131	[]	 Slave initialized successfully; upgrades available.
+132	[]	 Slave initialized successfully; security upgrades available.
+133	[s]	 Slave failed to initialize; errors follow with code 137.
+
+134	[]	 Update complete: no upgrades available.
+135	[]	 Update complete, upgrades available.
+136	[]	 Update complete, security upgrades available.
+
+137	[s]	 Fatal error.
+
+138     []	 Request to trigger a reload.  The applet should send message 1
+		 at its convenience.
+
+139	[]	 Finished downloading upgrades.
+
+In the table above, the second column lists any additional data sent
+with the message.  "s" indicates a string (sent by first sending a
+string::size_type value giving the length of the string, then sending
+the string itself), "f" indicates a floating-point number, "b"
+indicates a boolean value, and "i" indicates an integer value.
+
+If the slave closes the pipe without sending any data, it is assumed
+to have terminated in a catastrophic way.
