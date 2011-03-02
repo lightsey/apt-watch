@@ -272,7 +272,7 @@ static void bonobo_about(BonoboUIComponent *component, gpointer data,
 {
   GtkBuilder *builder;
   GError *error=NULL;
-  gchar *toplevel[] = {"about", NULL};
+  gchar *toplevel[] = {(gchar*)"about", NULL};
 
   builder = gtk_builder_new();
   if (!gtk_builder_add_objects_from_file(builder, builder_file, toplevel, &error)) {
@@ -741,7 +741,7 @@ static void do_notify(PanelApplet *applet)
 
   GtkBuilder *builder;
   GError *error=NULL;
-  gchar *toplevel[] = {"upgrade_dialog", NULL};
+  gchar *toplevel[] = {(gchar *)"upgrade_dialog", NULL};
 
   builder = gtk_builder_new();
   if (!gtk_builder_add_objects_from_file(builder, builder_file, toplevel, &error)) {

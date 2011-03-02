@@ -52,7 +52,7 @@ void do_preferences(gpointer data)
   GError *error=NULL;
   GtkWidget *preferences_dialog;
 
-  builder=get_builder_new();
+  builder=gtk_builder_new();
   
   if (!gtk_builder_add_from_file(builder, builder_file, &error)) {
       g_warning ("Couldn't load builder file: %s", error->message);
@@ -62,7 +62,7 @@ void do_preferences(gpointer data)
 
   gtk_builder_connect_signals(builder, NULL);
 
-  preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, “preferences_dialog”));
+  preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
 
   g_object_set_data(G_OBJECT(preferences_dialog), "applet", applet);
 
