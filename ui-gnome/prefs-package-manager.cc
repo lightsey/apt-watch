@@ -10,6 +10,8 @@
 
 #include <common/fileutl.h>
 
+#include <cstring>
+#include <cctype>
 #include <string>
 
 #include <gtk/gtk.h>

@@ -4,6 +4,9 @@
 
 #include "apt-watch-common.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <errno.h>
 
 using namespace std;

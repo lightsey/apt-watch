@@ -16,8 +16,14 @@
 
 #include <security/pam_appl.h>
 
+#include <cstdio>
+#include <cstring>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 
 #include <string>
 
@@ -180,7 +186,7 @@ int main(int argc, char **argv)
 
       std::string display=getenv("DISPLAY");
 
-      rval=pam_start("apt-watch", "root", &pam_conversation, &pam_handle);
+      rval=pam_start("apt-watch-backend", "root", &pam_conversation, &pam_handle);
 
       if(rval!=PAM_SUCCESS)
 	{
@@ -191,8 +197,6 @@ int main(int argc, char **argv)
 
 	  return -1;
 	}
-
-      rval=pam_authenticate(pam_handle, 0);
 
       if(rval==PAM_SUCCESS)
 	rval=pam_authenticate(pam_handle, 0);
@@ -233,12 +237,16 @@ int main(int argc, char **argv)
       //
       // TODO: read the apt configuration here?
 
+      setegid(0);
+
       copy_recursive(home+"/.apt-watch/lists", "/var/lib/apt/lists");
       move_recursive(home+"/.apt-watch/archives", "/var/cache/apt/archives");
     }
 
+  pid_t pmpid;
+  int Status = 0;
   // Actually execute it.
-  switch(fork())
+  switch(pmpid = fork())
     {
     case 0:
       // Close all file descriptors.
@@ -249,9 +257,9 @@ int main(int argc, char **argv)
       close(0);
       close(1);
 
-      // Really become root, or xterm will slap us down to the
-      // unprivileged user again.
-      setuid(0);
+      // Really become root, or xterm and synaptic will have a fit
+      setresgid(0,0,0);
+      setresuid(0,0,0);
 
       // Run the appropriate program.  Uses the shell to do splitting,
       // etc (you have to know the root password to get here anyway,
@@ -274,8 +282,10 @@ int main(int argc, char **argv)
 	return -1;
       }
     default:
+      waitpid(pmpid,&Status,0);
       break;
     }
-
-  return 0;
+    
+	write_msgid(outfd, APPLET_REPLY_AUTH_FINISHED);
+	return 0;
 }

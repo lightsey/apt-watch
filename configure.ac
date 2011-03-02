@@ -8,6 +8,8 @@ dnl AC_CONFIG_SRCDIR([apt-watch.cc])
 dnl AM_CONFIG_HEADER([config.h])
 AM_CONFIG_HEADER(config.h)
 
+AM_MAINTAINER_MODE
+
 AC_LANG([C++])
 
 dnl  Checks for programs.
@@ -45,16 +47,15 @@ PKG_CHECK_MODULES(GNOME_APPLETS,
 		[AC_MSG_ERROR([libpanel-applet 2 required, not found.])] )
 
 AC_LANG_PUSH(C)
-AM_PATH_GDK_PIXBUF( , , [AC_MSG_ERROR([libgdk-pixbuf required, not found])])
 AC_LANG_POP(C)
 
 AM_GCONF_SOURCE_2
 
-CXXFLAGS="$CXXFLAGS -Wall -Werror"
+CXXFLAGS="$CXXFLAGS -Wall"
 
 dnl TODO: where else can it be?
 LIBGLADE_CFLAGS="-I/usr/include/libglade-2.0"
-LIBGLADE_LIBS="-Lglade-2.0"
+LIBGLADE_LIBS="-lglade-2.0"
 
 AC_CHECK_HEADER(apt-pkg/init.h, , [AC_MSG_ERROR([Can't find the APT header files -- please install libapt-pkg-dev])])
 
@@ -80,9 +81,9 @@ AC_ARG_ENABLE(debug,
 	  [AC_DEFINE(DEBUG, 1, [Enable the logging of debugging information])]
 	fi)
 
-AC_SUBST(GNOME_INCLUDES, "$GNOME_APPLETS_CFLAGS $LIBGLADE_CFLAGS $GDK_PIXBUF_CFLAGS")
+AC_SUBST(GNOME_INCLUDES, "$GNOME_APPLETS_CFLAGS $LIBGLADE_CFLAGS")
 
-AC_SUBST(GNOME_LDADD, "$GNOME_APPLETS_LIBS $LIBGLADE_LIBS $GDK_PIXBUF_LIBS")
+AC_SUBST(GNOME_LDADD, "$GNOME_APPLETS_LIBS $LIBGLADE_LIBS")
 
 AC_SUBST(FAM_LDADD, "$FAM_LDADD")
 

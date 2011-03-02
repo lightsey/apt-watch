@@ -4,11 +4,14 @@
 
 #include "fileutl.h"
 
+#include <cstdio>
+#include <cstring>
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <utime.h>
 
@@ -154,7 +157,8 @@ bool copy(const string &src, const string &dst)
       unlink(tmpnam.c_str());
       return false;
     }
-
+  
+  chown(dst.c_str(), geteuid(), getegid());
   return true;
 }
 
@@ -164,8 +168,10 @@ bool move(const string &src, const string &dst)
   fprintf(stderr, "MOVE %s -> %s\n", src.c_str(), dst.c_str());
 #endif
 
-  if(rename(src.c_str(), dst.c_str())==0)
+  if(rename(src.c_str(), dst.c_str())==0) {
+     chown(dst.c_str(), geteuid(), getegid());
     return true;
+  }
 
   if(!copy(src, dst))
     return false;
@@ -330,8 +336,10 @@ struct mv_dir_action
 
   bool operator()(const string &src, const string &dst) const
   {
-    if(rename(src.c_str(), dst.c_str())==0)
+    if(rename(src.c_str(), dst.c_str())==0) {
+      chown(dst.c_str(), geteuid(), getegid());
       return true;
+    }
 
     struct stat buf;
 

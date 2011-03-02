@@ -53,6 +53,9 @@ string progress_message;
 float progress_percent;
 bool progress_majorchange;
 
+time_t last_timeout;
+tm *last_tm;
+
 GtkImage *icon;
 GtkTooltips *tooltips;
 GtkWidget *ebox;
@@ -213,10 +216,10 @@ void setup_update_timeout(PanelApplet *applet)
 
       string key=string(panel_applet_get_preferences_key(applet))+"/check/last_check";
 
-      time_t last_timeout=gconf_client_get_int(confclient,
+      last_timeout=gconf_client_get_int(confclient,
 					       key.c_str(),
 					       &err);
-
+      last_tm = localtime(&last_timeout);
       if(err!=NULL)
 	{
 	  last_timeout=0;
@@ -381,6 +384,7 @@ static void set_state(applet_state new_state,
   applet_state old_state=state;
   state=new_state;
   string msg;
+  char tbuf[100];
 
   switch(state)
     {
@@ -402,9 +406,11 @@ static void set_state(applet_state new_state,
       gtk_image_set_from_stock(icon, GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_LARGE_TOOLBAR);
       break;
     case IDLE:
-      if(!can_upgrade)
-	msg="No upgrades available";
-      else if(!security_upgrades_available)
+      if(!can_upgrade) {
+	msg="No upgrades available.\nChecked on ";
+	strftime(tbuf, 100, "%m-%d at %l:%M %p", last_tm);
+	msg += tbuf;
+      } else if(!security_upgrades_available)
 	msg="Upgrades available";
       else
 	msg="Security upgrades available";
@@ -739,15 +745,16 @@ static void do_notify(PanelApplet *applet)
   GtkWidget *label=glade_xml_get_widget(xml, "upgrade_message");
 
   if(security_upgrades_available)
-    message="Security upgrades are available.";
+    message="<span weight=\"bold\" size=\"larger\">There are security upgrades available</span>";
   else
-    message="Upgrades are available.";
+    message="<span weight=\"bold\" size=\"larger\">There are upgrades available</span>";
 
-  message+="  Click the button below to install them.";
+  // message+="  Click the button below to install them.";
+  
+  gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+  gtk_label_set_label(GTK_LABEL(label), message.c_str());
 
-  gtk_label_set_text(GTK_LABEL(label), message.c_str());
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog))!=GTK_RESPONSE_DELETE_EVENT)
+  if(gtk_dialog_run(GTK_DIALOG(dialog))==GTK_RESPONSE_ACCEPT)
     start_package_manager(applet);
 
   gtk_widget_destroy(dialog);
@@ -854,7 +861,7 @@ static gboolean handle_slave_msg(GIOChannel *source,
 		   op.c_str(), (int) percent);
 
 	    progress_message=op;
-	    progress_percent=percent;
+	    progress_percent=percent * 2;
 	    progress_majorchange=majorchange;
 
 	    set_state(state, applet);
@@ -871,6 +878,10 @@ static gboolean handle_slave_msg(GIOChannel *source,
 	  break;
 
 	case APPLET_REPLY_AUTH_OK:
+	  break;
+	
+	case APPLET_REPLY_AUTH_FINISHED:
+	  do_reload(applet);
 	  break;
 
 	case APPLET_REPLY_CMD_COMPLETE_NOUPGRADES:
@@ -1032,7 +1043,7 @@ static void run_error_dlg(const char *message)
 
 static bool start_slave(PanelApplet *applet)
 {
-  char *argv[]={LIBEXECDIR "/apt-watch-slave", NULL};
+  char *argv[]={const_cast<char *>(LIBEXECDIR "/apt-watch-slave"), NULL};
 
   // Clear out any messages lingering from a previous slave.
   progress_message="";
@@ -1189,7 +1200,7 @@ apt_watch_applet_fill (PanelApplet *applet,
   // Don't try to abort, it causes more problems than it solves IMO
   start_slave(applet);
 
-  gtk_container_set_border_width(GTK_CONTAINER(applet), 10);
+  gtk_container_set_border_width(GTK_CONTAINER(applet), 0);
 
   gtk_box_pack_end(GTK_BOX(vbox),
 		   GTK_WIDGET(icon),

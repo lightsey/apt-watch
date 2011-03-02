@@ -18,8 +18,8 @@
                 <item value="IDL:Bonobo/Control:1.0"/>
                 <item value="IDL:Bonobo/Unknown:1.0"/>
         </oaf_attribute>
-        <oaf_attribute name="name" type="string" value="apt-watch applet"/>
-        <oaf_attribute name="description" type="string" value="APT update watcher"/>
+        <oaf_attribute name="name" type="string" value="APT Update Watcher"/>
+        <oaf_attribute name="description" type="string" value="Automatically checks for software updates"/>
         <oaf_attribute name="panel:category" type="string" value="Utility"/>
         <oaf_attribute name="panel:icon" type="string" value="gnome-applets.png"/>
 </oaf_server>

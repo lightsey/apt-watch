@@ -40,6 +40,8 @@
 
 #define APPLET_REPLY_DOWNLOAD_COMPLETE 139
 
+#define APPLET_REPLY_AUTH_FINISHED 140
+
 // TODO: protocol marshalling/demarshalling functions.
 
 /** Write a string to the given fd */
