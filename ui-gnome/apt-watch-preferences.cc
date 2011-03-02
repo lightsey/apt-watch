@@ -1,6 +1,7 @@
 // apt-watch-preferences.cc
 //
 //  Copyright 2004 Daniel Burrows
+//  Copyright 2011 John Lightsey
 //
 // We know about the following gconf preferences:
 //
@@ -22,7 +23,6 @@
 
 #include <string>
 
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #ifdef HAVE_CONFIG_H
@@ -37,7 +37,7 @@
 
 using namespace std;
 
-const char *glade_file = DATADIR "/apt-watch/apt-watch.glade";
+const char *builder_file = DATADIR "/apt-watch/apt-watch.ui";
 
 void do_notify_remove(GtkWidget *widget,
 		      gpointer userdata)
@@ -48,19 +48,26 @@ void do_notify_remove(GtkWidget *widget,
 void do_preferences(gpointer data)
 {
   PanelApplet *applet=(PanelApplet *) data;
+  GtkBuilder *builder;
+  GError *error=NULL;
+  GtkWidget *preferences_dialog;
 
-  GladeXML *xml;
+  builder=get_builder_new();
+  
+  if (!gtk_builder_add_from_file(builder, builder_file, &error)) {
+      g_warning ("Couldn't load builder file: %s", error->message);
+      g_error_free(error);
+  }
+  
 
-  xml = glade_xml_new(glade_file, "preferences_dialog", NULL);
+  gtk_builder_connect_signals(builder, NULL);
 
-  glade_xml_signal_autoconnect(xml);
-
-  GtkWidget *preferences_dialog=glade_xml_get_widget(xml, "preferences_dialog");
+  preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, “preferences_dialog”));
 
   g_object_set_data(G_OBJECT(preferences_dialog), "applet", applet);
 
-  init_preferences_check_freq(applet, xml);
-  init_preferences_download_upgrades(applet, xml);
-  init_preferences_package_manager(applet, xml);
-  init_preferences_notify(applet, xml);
+  init_preferences_check_freq(applet, builder);
+  init_preferences_download_upgrades(applet, builder);
+  init_preferences_package_manager(applet, builder);
+  init_preferences_notify(applet, builder);
 }

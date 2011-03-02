@@ -10,9 +10,9 @@
 
 struct _PanelApplet;
 typedef struct _PanelApplet PanelApplet;
-struct _GladeXML;
-typedef struct _GladeXML GladeXML;
+struct _GtkBuilder;
+typedef struct _GtkBuilder GtkBuilder;
 
-void init_preferences_check_freq(PanelApplet *applet, GladeXML *xml);
+void init_preferences_check_freq(PanelApplet *applet, GtkBuilder *builder);
 
 #endif // PREFS_CHECK_FREQ_H

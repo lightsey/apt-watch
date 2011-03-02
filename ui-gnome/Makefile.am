@@ -7,7 +7,7 @@ apt_watch_SOURCES = \
 	prefs-package-manager.cc prefs-package-manager.h \
 	prefs-notify.cc prefs-notify.h
 
-pkgdata_DATA=apt-watch.glade
+pkgdata_DATA=apt-watch.ui
 
 apt_watch_LDADD=@GNOME_LDADD@ ../common/libapt-watch-common.a
 
@@ -25,7 +25,7 @@ $(server_DATA): $(server_in_files)
 uidir = $(datadir)/gnome-2.0/ui
 # ui_DATA = apt-watch.xml
 
-EXTRA_DIST = apt-watch.server.in apt-watch.glade apt-watch.schemas
+EXTRA_DIST = apt-watch.server.in apt-watch.ui apt-watch.schemas
 
 SUBDIRS=pixmaps
 

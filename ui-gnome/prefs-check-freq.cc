@@ -12,7 +12,6 @@
 #include <string>
 
 #include <gtk/gtk.h>
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #ifdef HAVE_CONFIG_H
@@ -109,13 +108,12 @@ static void notify_prefs_check_freq(GConfClient *client,
 		    "suppress_check_freq_toggle", GINT_TO_POINTER(0));
 }
 
-void init_preferences_check_freq(PanelApplet *applet, GladeXML *xml)
+void init_preferences_check_freq(PanelApplet *applet, GtkBuilder *builder)
 {
-  GtkWidget *preferences_dialog=glade_xml_get_widget(xml, "preferences_dialog");
-
-  GtkWidget *check_never=glade_xml_get_widget(xml, "check_never");
-  GtkWidget *check_daily=glade_xml_get_widget(xml, "check_daily");
-  GtkWidget *check_weekly=glade_xml_get_widget(xml, "check_weekly");
+  GtkWidget *preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
+  GtkWidget *check_never=GTK_WIDGET(gtk_builder_get_object(builder, "check_never"));
+  GtkWidget *check_daily=GTK_WIDGET(gtk_builder_get_object(builder, "check_daily"));
+  GtkWidget *check_weekly=GTK_WIDGET(gtk_builder_get_object(builder, "check_weekly"));
 
   g_return_if_fail(check_never && check_daily && check_weekly);
 
@@ -163,9 +161,7 @@ void init_preferences_check_freq(PanelApplet *applet, GladeXML *xml)
 
   g_return_if_fail(wname!=NULL);
 
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml,
-								      wname)),
-			       TRUE);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, wname)), TRUE);
 
   g_signal_connect(preferences_dialog,
 		   "destroy",

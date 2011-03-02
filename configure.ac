@@ -53,10 +53,6 @@ AM_GCONF_SOURCE_2
 
 CXXFLAGS="$CXXFLAGS -Wall"
 
-dnl TODO: where else can it be?
-LIBGLADE_CFLAGS="-I/usr/include/libglade-2.0"
-LIBGLADE_LIBS="-lglade-2.0"
-
 AC_CHECK_HEADER(apt-pkg/init.h, , [AC_MSG_ERROR([Can't find the APT header files -- please install libapt-pkg-dev])])
 
 AC_CHECK_LIB(apt-pkg, main, [AC_DEFINE(HAVE_LIBAPT_PKG, [], [Define to 1 if you have the apt-pkg library])], [AC_MSG_ERROR([Can't find the APT library -- please install libapt-pkg-dev])])
@@ -81,9 +77,9 @@ AC_ARG_ENABLE(debug,
 	  [AC_DEFINE(DEBUG, 1, [Enable the logging of debugging information])]
 	fi)
 
-AC_SUBST(GNOME_INCLUDES, "$GNOME_APPLETS_CFLAGS $LIBGLADE_CFLAGS")
+AC_SUBST(GNOME_INCLUDES, "$GNOME_APPLETS_CFLAGS")
 
-AC_SUBST(GNOME_LDADD, "$GNOME_APPLETS_LIBS $LIBGLADE_LIBS")
+AC_SUBST(GNOME_LDADD, "$GNOME_APPLETS_LIBS")
 
 AC_SUBST(FAM_LDADD, "$FAM_LDADD")
 

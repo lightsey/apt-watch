@@ -1,6 +1,7 @@
 // prefs-download-upgrade.cc
 //
 //  Copyright 2004 Daniel Burrows
+//  Copyright 2011 John Lightsey
 //
 // Code to manage the "what upgrades to download" portion of the preferences
 // dialog.
@@ -12,7 +13,6 @@
 #include <string>
 
 #include <gtk/gtk.h>
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #ifdef HAVE_CONFIG_H
@@ -109,12 +109,12 @@ static void notify_prefs_download_upgrades(GConfClient *client,
 		    "suppress_download_upgrades_toggle", GINT_TO_POINTER(0));
 }
 
-void init_preferences_download_upgrades(PanelApplet *applet, GladeXML *xml)
+void init_preferences_download_upgrades(PanelApplet *applet, GtkBuilder *builder)
 {
-  GtkWidget *preferences_dialog=glade_xml_get_widget(xml, "preferences_dialog");
-  GtkWidget *download_none=glade_xml_get_widget(xml, "download_none");
-  GtkWidget *download_security=glade_xml_get_widget(xml, "download_security");
-  GtkWidget *download_all=glade_xml_get_widget(xml, "download_all");
+  GtkWidget *preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
+  GtkWidget *download_none=GTK_WIDGET(gtk_builder_get_object(builder, "download_none"));
+  GtkWidget *download_security=GTK_WIDGET(gtk_builder_get_object(builder, "download_security"));
+  GtkWidget *download_all=GTK_WIDGET(gtk_builder_get_object(builder, "download_all"));
 
   g_return_if_fail(download_none && download_security && download_all);
 
@@ -160,9 +160,7 @@ void init_preferences_download_upgrades(PanelApplet *applet, GladeXML *xml)
 
   g_return_if_fail(wname!=NULL);
 
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml,
-								      wname)),
-			       TRUE);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, wname)), TRUE);
 
   g_signal_connect(preferences_dialog,
 		   "destroy",

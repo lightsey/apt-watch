@@ -1,6 +1,7 @@
 // prefs-package-manager.h                        -*-c++-*-
 //
 //  Copyright 2004 Daniel Burrows
+//  Copyright 2011 John Lightsey
 //
 // Code to manage the "which package manager to use" settings.
 
@@ -15,7 +16,6 @@
 #include <string>
 
 #include <gtk/gtk.h>
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #ifdef HAVE_CONFIG_H
@@ -335,13 +335,14 @@ static void notify_pm_custom_changed(GConfClient *client,
   update_pm_widgets(menu, userdata);
 }
 
-void init_preferences_package_manager(PanelApplet *applet, GladeXML *xml)
+void init_preferences_package_manager(PanelApplet *applet, GtkBuilder *builder)
 {
-  GtkWidget *preferences_dialog=glade_xml_get_widget(xml, "preferences_dialog");
+  GtkWidget *preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
 
-  GtkOptionMenu *optionmenu=GTK_OPTION_MENU(glade_xml_get_widget(xml, "package_manager_menu"));
-  GtkEntry *command=GTK_ENTRY(glade_xml_get_widget(xml, "package_manager_command"));
-  GtkCheckButton *run_in_xterm=GTK_CHECK_BUTTON(glade_xml_get_widget(xml, "package_manager_run_in_xterm"));
+  // TODO: package_manager_menu is no longer a GtkOptionMenu
+  GtkOptionMenu *optionmenu=GTK_OPTION_MENU(gtk_builder_get_object(builder, "package_manager_menu"));
+  GtkEntry *command=GTK_ENTRY(gtk_builder_get_object(builder, "package_manager_command"));
+  GtkCheckButton *run_in_xterm=GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "package_manager_run_in_xterm"));
 
   g_object_set_data(G_OBJECT(preferences_dialog), "package_manager_menu", optionmenu);
   g_object_set_data(G_OBJECT(preferences_dialog), "package_manager_command", command);

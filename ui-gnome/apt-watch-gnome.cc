@@ -6,7 +6,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
 #include <glib.h>
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #include <stdlib.h>
@@ -271,11 +270,17 @@ static void notify_download_upgrades(GConfClient *client,
 static void bonobo_about(BonoboUIComponent *component, gpointer data,
 			  const char *name)
 {
-  GladeXML *xml;
+  GtkBuilder *builder;
+  GError *error=NULL;
+  gchar *toplevel[] = {"about", NULL};
 
-  xml = glade_xml_new(glade_file, "about", NULL);
+  builder = gtk_builder_new();
+  if (!gtk_builder_add_objects_from_file(builder, builder_file, toplevel, &error)) {
+      g_warning ("Couldn't load builder file: %s", error->message);
+      g_error_free(error);
+  }
 
-  glade_xml_signal_autoconnect(xml);
+  gtk_builder_connect_signals(builder, NULL);
 }
 
 static void bonobo_update(BonoboUIComponent *component, gpointer data,
@@ -734,15 +739,23 @@ static void do_notify(PanelApplet *applet)
 
   pending_notify=false;
 
-  GladeXML *xml;
+  GtkBuilder *builder;
+  GError *error=NULL;
+  gchar *toplevel[] = {"upgrade_dialog", NULL};
+
+  builder = gtk_builder_new();
+  if (!gtk_builder_add_objects_from_file(builder, builder_file, toplevel, &error)) {
+      g_warning ("Couldn't load builder file: %s", error->message);
+      g_error_free(error);
+      return;
+  }
+
+  gtk_builder_connect_signals(builder, NULL);
+
   string message;
 
-  xml = glade_xml_new(glade_file, "upgrade_dialog", NULL);
-  g_return_if_fail(xml!=NULL);
-  glade_xml_signal_autoconnect(xml);
-
-  GtkWidget *dialog=glade_xml_get_widget(xml, "upgrade_dialog");
-  GtkWidget *label=glade_xml_get_widget(xml, "upgrade_message");
+  GtkWidget *dialog=GTK_WIDGET(gtk_builder_get_object(builder, "upgrade_dialog"));
+  GtkWidget *label=GTK_WIDGET(gtk_builder_get_object(builder, "upgrade_message"));
 
   if(security_upgrades_available)
     message="<span weight=\"bold\" size=\"larger\">There are security upgrades available</span>";

@@ -1,6 +1,7 @@
 // prefs-notify.h                        -*-c++-*-
 //
 //  Copyright 2004 Daniel Burrows
+//  Copyright 2011 John Lightsey
 //
 // Code to manage the "notifications about upgrades" dialog.
 
@@ -11,7 +12,6 @@
 #include <string>
 
 #include <gtk/gtk.h>
-#include <glade/glade-xml.h>
 #include <panel-applet.h>
 
 #ifdef HAVE_CONFIG_H
@@ -99,13 +99,13 @@ static void notify_prefs_notify_message(GConfClient *client,
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(notify_message_all), notify==NOTIFY_MESSAGE_ALL);
 }
 
-void init_preferences_notify(PanelApplet *applet, GladeXML *xml)
+void init_preferences_notify(PanelApplet *applet, GtkBuilder *builder)
 {
-  GtkWidget *preferences_dialog=glade_xml_get_widget(xml, "preferences_dialog");
+  GtkWidget *preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
 
-  GtkWidget *notify_message_all=glade_xml_get_widget(xml, "notify_message_all");
-  GtkWidget *notify_message_security=glade_xml_get_widget(xml, "notify_message_security");
-  GtkWidget *notify_message_never=glade_xml_get_widget(xml, "notify_message_never");
+  GtkWidget *notify_message_all=GTK_WIDGET(gtk_builder_get_object(builder, "notify_message_all"));
+  GtkWidget *notify_message_security=GTK_WIDGET(gtk_builder_get_object(builder, "notify_message_security"));
+  GtkWidget *notify_message_never=GTK_WIDGET(gtk_builder_get_object(builder, "notify_message_never"));
 
   g_return_if_fail(notify_message_all && notify_message_security && notify_message_never);
 
@@ -151,9 +151,7 @@ void init_preferences_notify(PanelApplet *applet, GladeXML *xml)
 
   g_return_if_fail(wname!=NULL);
 
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml,
-								      wname)),
-			       TRUE);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, wname)), TRUE);
 
   g_signal_connect(preferences_dialog,
 		   "destroy",

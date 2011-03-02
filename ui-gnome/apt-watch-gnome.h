@@ -31,7 +31,7 @@ CheckFreq get_check_freq(PanelApplet *applet);
 DownloadUpgrades get_download_upgrades(PanelApplet *applet);
 NotifyMessage get_notify_message(PanelApplet *applet);
 const package_manager *get_package_manager(PanelApplet *applet);
-extern const char *glade_file;
+extern const char *builder_file;
 
 // in apt-watch.cc
 extern GConfClient *confclient;
