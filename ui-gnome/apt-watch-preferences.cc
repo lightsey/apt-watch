@@ -51,10 +51,11 @@ void do_preferences(gpointer data)
   GtkBuilder *builder;
   GError *error=NULL;
   GtkWidget *preferences_dialog;
+  gchar *toplevel[] = {(gchar*)"preferences_dialog", NULL};
 
   builder=gtk_builder_new();
   
-  if (!gtk_builder_add_from_file(builder, builder_file, &error)) {
+  if (!gtk_builder_add_objects_from_file(builder, builder_file, toplevel, &error)) {
       g_warning ("Couldn't load builder file: %s", error->message);
       g_error_free(error);
   }
