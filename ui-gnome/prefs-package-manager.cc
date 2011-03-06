@@ -149,18 +149,23 @@ const package_manager *get_package_manager(PanelApplet *applet)
 /** Given an option menu, return the selected package manager or -1 for
  *  a custom package manager.
  */
-static int get_selected_manager(GtkOptionMenu *menu)
+static int get_selected_manager(GtkComboBox *menu)
 {
-  GtkMenuShell *shell=GTK_MENU_SHELL(gtk_option_menu_get_menu(menu));
+  GtkTreeIter iter;
+  GValue selected_value = {0};
+  int selected_manager = PM_CUSTOM;
+  if (!gtk_combo_box_get_active_iter(menu, &iter)) {
+      return selected_manager;
+  }
 
-  int selected_loc=gtk_option_menu_get_history(menu);
+  GtkTreeModel *model = gtk_combo_box_get_model(menu);
+  
+  gtk_tree_model_get_value(model, &iter, 2, &selected_value);
+  selected_manager = g_value_get_int(&selected_value);
+  g_value_unset(&selected_value);
 
-  g_return_val_if_fail(selected_loc>=0, -1);
-
-  GtkWidget *selected_item=GTK_WIDGET(g_list_nth(shell->children,
-						 selected_loc)->data);
-
-  return GPOINTER_TO_INT(g_object_get_data(G_OBJECT(selected_item), "val"));
+  g_object_unref(G_OBJECT(model));
+  return selected_manager;
 }
 
 /** IF the "custom" entry of the GtkOptionMenu is selected, set the
@@ -173,7 +178,7 @@ static void pm_command_edited(GtkWidget *w, GdkEventFocus *event,
 
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
   PanelApplet *applet=PANEL_APPLET(g_object_get_data(G_OBJECT(preferences_dialog), "applet"));
-  GtkOptionMenu *menu=GTK_OPTION_MENU(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
+  GtkComboBox *menu=GTK_COMBO_BOX(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
 
   if(get_selected_manager(menu)!=-1)
     return;
@@ -197,7 +202,7 @@ static void pm_run_in_xterm_toggled(GtkToggleButton *button, gpointer userdata)
 {
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
   PanelApplet *applet=PANEL_APPLET(g_object_get_data(G_OBJECT(preferences_dialog), "applet"));
-  GtkOptionMenu *menu=GTK_OPTION_MENU(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
+  GtkComboBox *menu=GTK_COMBO_BOX(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
 
   if(get_selected_manager(menu)!=-1)
     return;
@@ -217,7 +222,7 @@ static void pm_run_in_xterm_toggled(GtkToggleButton *button, gpointer userdata)
 /** Handles updating the package manager that's selected in GConf based
  *  on the current setting of the option menu.
  */
-static void pm_chosen(GtkOptionMenu *menu, gpointer userdata)
+static void pm_chosen(GtkComboBox *menu, gpointer userdata)
 {
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
   PanelApplet *applet=PANEL_APPLET(g_object_get_data(G_OBJECT(preferences_dialog), "applet"));
@@ -238,7 +243,7 @@ static void pm_chosen(GtkOptionMenu *menu, gpointer userdata)
 /** Update the entry and check-button to reflect the state of the
  *  option menu.  Does not actually change any options.
  */
-static void update_pm_widgets(GtkOptionMenu *optionmenu, gpointer userdata)
+static void update_pm_widgets(GtkComboBox *optionmenu, gpointer userdata)
 {
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
 
@@ -313,7 +318,7 @@ static void notify_pm_changed(GConfClient *client,
 {
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
   PanelApplet *applet=PANEL_APPLET(g_object_get_data(G_OBJECT(preferences_dialog), "applet"));
-  GtkOptionMenu *menu=GTK_OPTION_MENU(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
+  GtkComboBox *menu=GTK_COMBO_BOX(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
 
   // exploit the fact that the index in the lookup table is also the
   // index in the menu.
@@ -321,7 +326,7 @@ static void notify_pm_changed(GConfClient *client,
 
   g_return_if_fail(loc>0);
 
-  gtk_option_menu_set_history(menu, loc);
+  gtk_combo_box_set_active(menu, loc);
 }
 
 static void notify_pm_custom_changed(GConfClient *client,
@@ -330,7 +335,7 @@ static void notify_pm_custom_changed(GConfClient *client,
 				     gpointer userdata)
 {
   GtkWidget *preferences_dialog=GTK_WIDGET(userdata);
-  GtkOptionMenu *menu=GTK_OPTION_MENU(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
+  GtkComboBox *menu=GTK_COMBO_BOX(g_object_get_data(G_OBJECT(preferences_dialog), "package_manager_menu"));
 
   update_pm_widgets(menu, userdata);
 }
@@ -340,7 +345,7 @@ void init_preferences_package_manager(PanelApplet *applet, GtkBuilder *builder)
   GtkWidget *preferences_dialog=GTK_WIDGET(gtk_builder_get_object(builder, "preferences_dialog"));
 
   // TODO: package_manager_menu is no longer a GtkOptionMenu
-  GtkOptionMenu *optionmenu=GTK_OPTION_MENU(gtk_builder_get_object(builder, "package_manager_menu"));
+  GtkComboBox *optionmenu=GTK_COMBO_BOX(gtk_builder_get_object(builder, "package_manager_menu"));
   GtkEntry *command=GTK_ENTRY(gtk_builder_get_object(builder, "package_manager_command"));
   GtkCheckButton *run_in_xterm=GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "package_manager_run_in_xterm"));
 
@@ -377,9 +382,12 @@ void init_preferences_package_manager(PanelApplet *applet, GtkBuilder *builder)
 
   handle_gerror("Can't monitor the custom_package_manager_run_in_xterm key, is GConf working?\n\nError: %s", &err, false);
 
-  GtkMenuShell *menu=GTK_MENU_SHELL(gtk_menu_new());
+  GtkListStore *menu=gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_INT);
+  
+  // GtkMenuShell *menu=GTK_MENU_SHELL(gtk_menu_new());
 
-  int select_cell=0;
+  GtkTreeIter iter;
+  GtkTreeIter active;
 
   int curr_enum_value=get_package_manager_enum(applet);
 
@@ -393,23 +401,27 @@ void init_preferences_package_manager(PanelApplet *applet, GtkBuilder *builder)
       string capitalized=pair->str;
       capitalized[0]=toupper(capitalized[0]);
 
-      if(pair->enum_value==curr_enum_value)
-	  select_cell=i;
-
-      GtkWidget *item=gtk_menu_item_new_with_label(capitalized.c_str());
-
-      g_object_set_data(G_OBJECT(item), "val",
-			GINT_TO_POINTER(pair->enum_value));
-
+      gtk_list_store_append( menu, &iter );
+      
+      gboolean visible = true;
       if(pair->enum_value!=-1 && !in_path(pair->str))
-	gtk_widget_set_sensitive(GTK_WIDGET(item), 0);
+          visible = false;
 
-      gtk_menu_shell_append(menu, item);
+      gtk_list_store_set( menu, &iter, 0, capitalized.c_str(), 1, visible, 2, pair->enum_value, -1 );
+
+      if (pair->enum_value==curr_enum_value)
+         active=iter;
     }
 
-  gtk_widget_show_all(GTK_WIDGET(menu));
-  gtk_option_menu_set_menu(optionmenu, GTK_WIDGET(menu));
-  gtk_option_menu_set_history(optionmenu, select_cell);
+  gtk_combo_box_set_model(optionmenu,GTK_TREE_MODEL(menu));
+  g_object_unref(G_OBJECT(menu));
+  
+  GtkCellRenderer *cell = gtk_cell_renderer_text_new();
+  gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( optionmenu ), cell, TRUE );
+  gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT( optionmenu ), cell, "text", 0, "sensitive", 1, NULL );
+  g_object_unref(G_OBJECT(cell));
+  
+  gtk_combo_box_set_active_iter(optionmenu, &active);
 
   update_pm_widgets(optionmenu, preferences_dialog);
   g_signal_connect(G_OBJECT(optionmenu), "changed",
