@@ -1,6 +1,10 @@
 /* apt-watch-slave: the slave run as superuser (from su)
  *
  * Expects argv[1] to be an fd on which arguments are passed.
+ *
+ * Copyright 2004 Daniel Burrows
+ * Copyright 2011 John Lightsey
+ *
  */
 
 #include <stdio.h>
@@ -408,8 +412,14 @@ static void do_update(int outfd)
       return;
     }
 
-  pkgAcquire fetcher(&log);
-
+  pkgAcquire fetcher;
+  
+  if (!fetcher.Setup(&log, ""))
+    {
+      dump_errors(APPLET_REPLY_FATALERROR, outfd);
+      return;
+    }
+  
   if(!sources.GetIndexes(&fetcher))
     {
       dump_errors(APPLET_REPLY_FATALERROR, outfd);
@@ -605,8 +615,14 @@ static void do_download(int cmdfd, int outfd)
   read(cmdfd, &download_all, sizeof(download_all));
 
   slaveAcquireStatus log(outfd);
-  pkgAcquire fetcher(&log);
-
+  pkgAcquire fetcher;
+  
+  if (!fetcher.Setup(&log, ""))
+    {
+      dump_errors(APPLET_REPLY_FATALERROR, outfd);
+      return;
+    }
+  
   pkgSourceList sources;
   pkgRecords records(*cache);
 
