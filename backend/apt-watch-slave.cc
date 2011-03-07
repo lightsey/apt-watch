@@ -433,7 +433,7 @@ static void do_update(int outfd)
     }
 
   cache->Close();
-  if(!cache->Open(progress, false))
+  if(!cache->Open(&progress, false))
     {
       dump_errors(APPLET_REPLY_FATALERROR, outfd);
       return;
@@ -479,7 +479,7 @@ static void do_reload(int outfd)
 
   cache->Close();
 
-  if(!cache->Open(progress, false))
+  if(!cache->Open(&progress, false))
     dump_errors(APPLET_REPLY_FATALERROR, outfd);
   else
     write_cmd_reply(outfd);
@@ -1043,7 +1043,7 @@ int main(int argc, char **argv)
   cache=new pkgCacheFile;
   SlaveProgress progress(outfd);
 
-  if(!cache->Open(progress, false) || _error->PendingError())
+  if(!cache->Open(&progress, false) || _error->PendingError())
     {
       dump_errors(APPLET_REPLY_INIT_FAILED, outfd);
       return -1;
