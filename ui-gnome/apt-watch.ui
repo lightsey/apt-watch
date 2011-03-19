@@ -20,7 +20,8 @@ Debian system.</property>
     <property name="authors">Daniel Burrows &lt;dburrows@debian.org&gt;
 John Lightsey &lt;lightsey@debian.org&gt;</property>
     <property name="translator_credits" translatable="yes">translator_credits</property>
-    <property name="logo">gnome-debian.png</property>
+    <property name="logo">pixmaps/gnome-debian-small.png</property>
+    <signal name="response" handler="gtk_widget_destroy"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <child internal-child="action_area">
