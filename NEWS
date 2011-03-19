@@ -1,6 +1,10 @@
-[03/01/2011]
-Version 0.4.0
-  * Switch from Glade to GtkBuilder
+[03/19/2011]
+Version 0.3.3
+  * Switch from Glade to GtkBuilder.
+
+  * Remove deprecated libapt-pkg methods.
+
+  * Remove deprecated Gnome classes in preparation for Gnome 3.
 
 [05/05/2004]
 Version 0.3.2 "Fixer-upper"
