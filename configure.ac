@@ -46,6 +46,8 @@ PKG_CHECK_MODULES(GNOME_APPLETS,
 		build_gpanel=true,
 		[AC_MSG_ERROR([libpanel-applet 4 required, not found.])] )
 
+LIBPANEL_APPLET_DIR=`$PKG_CONFIG --variable=libpanel_applet_dir libpanelapplet-4.0`
+
 AC_LANG_PUSH(C)
 AC_LANG_POP(C)
 

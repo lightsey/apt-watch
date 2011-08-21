@@ -13,19 +13,31 @@ apt_watch_LDADD=@GNOME_LDADD@ ../common/libapt-watch-common.a
 
 INCLUDES=@GNOME_INCLUDES@ -I../common
 
-## Gnome2 stuff
+## Applet conf installation
+appletdir       = $(LIBPANEL_APPLET_DIR)
+applet_in_files = org.gnome.panel.Apt_Watch.panel-applet.in
+applet_DATA     = $(applet_in_files:.panel-applet.in=.panel-applet)
+org.gnome.panel.Apt_Watch.panel-applet: $(applet_in_files)
+	$(AM_V_GEN)sed \
+	-e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
+	-e "s|\@VERSION\@|$(PACKAGE_VERSION)|" \
+	$< > $@
 
-serverdir       = $(libdir)/bonobo/servers
-server_in_files = apt-watch.server.in
-server_DATA     = $(server_in_files:.server.in=.server)
+## Dbus service conf installation
+servicedir       = $(datadir)/dbus-1/services
+service_in_files = org.gnome.panel.applet.Apt_WatchFactory.service.in
+service_DATA     = $(service_in_files:.service.in=.service)
 
-$(server_DATA): $(server_in_files)
-	sed -e "s|\@LIBEXECDIR\@|$(libexecdir)|" $< > $@
+org.gnome.panel.applet.Apt_WatchFactory.service: $(service_in_files)
+	$(AM_V_GEN)sed \
+	-e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
+	-e "s|\@VERSION\@|$(PACKAGE_VERSION)|" \
+	$< > $@
 
 uidir = $(datadir)/gnome-2.0/ui
 # ui_DATA = apt-watch.xml
 
-EXTRA_DIST = apt-watch.server.in apt-watch.ui apt-watch.schemas
+EXTRA_DIST = org.gnome.panel.Apt_Watch.panel-applet.in.in $(service_in_files) apt-watch.ui apt-watch.schemas
 
 SUBDIRS=pixmaps
 
