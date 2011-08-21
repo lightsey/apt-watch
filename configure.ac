@@ -39,12 +39,12 @@ dnl  Gnome 2 tests.  Is this documented ANYWHERE??
 dnl 
 dnl  Scavenged from bubblemon
 
-LIBPANEL_REQUIRED=2.0.0
+LIBPANEL_REQUIRED=3.0.0.0
 
 PKG_CHECK_MODULES(GNOME_APPLETS,
-		[libpanelapplet-2.0 >= $LIBPANEL_REQUIRED],
+		[libpanelapplet-4.0 >= $LIBPANEL_REQUIRED],
 		build_gpanel=true,
-		[AC_MSG_ERROR([libpanel-applet 2 required, not found.])] )
+		[AC_MSG_ERROR([libpanel-applet 4 required, not found.])] )
 
 AC_LANG_PUSH(C)
 AC_LANG_POP(C)
