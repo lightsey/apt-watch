@@ -6,6 +6,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <panel-applet.h>
 
 #include <stdlib.h>
@@ -56,7 +57,6 @@ time_t last_timeout;
 tm *last_tm;
 
 GtkImage *icon;
-GtkTooltips *tooltips;
 GtkWidget *ebox;
 
 GdkPixbuf *static_swirl;
@@ -267,8 +267,8 @@ static void notify_download_upgrades(GConfClient *client,
   maybe_download((PanelApplet *) userdata);
 }
 
-static void bonobo_about(BonoboUIComponent *component, gpointer data,
-			  const char *name)
+static void bonobo_about(GtkAction       *action,
+                         gpointer data)
 {
   GtkBuilder *builder;
   GError *error=NULL;
@@ -283,22 +283,22 @@ static void bonobo_about(BonoboUIComponent *component, gpointer data,
   gtk_builder_connect_signals(builder, NULL);
 }
 
-static void bonobo_update(BonoboUIComponent *component, gpointer data,
-			  const char *name)
+static void bonobo_update(GtkAction       *action,
+                         gpointer data)
 {
   do_update(data);
 }
 
-static void bonobo_start(BonoboUIComponent *component, gpointer data,
-			 const char *name)
+static void bonobo_start(GtkAction       *action,
+                         gpointer data)
 {
   PanelApplet *applet=(PanelApplet *) data;
 
   start_slave(applet);
 }
 
-static void bonobo_prefs(BonoboUIComponent *component, gpointer data,
-			 const char *name)
+static void bonobo_prefs(GtkAction       *action,
+                         gpointer data)
 {
   do_preferences(data);
 }
@@ -312,15 +312,15 @@ static void start_package_manager(PanelApplet *applet)
   write_string(to_slave, manager->cmd);
 }
 
-static void bonobo_package_manager(BonoboUIComponent *component, gpointer data,
-				   const char *name)
+static void bonobo_package_manager(GtkAction       *action,
+                         gpointer data)
 {
   if(state==IDLE)
     start_package_manager(PANEL_APPLET(data));
 }
 
-static void bonobo_download(BonoboUIComponent *component, gpointer data,
-			    const char *name)
+static void bonobo_download(GtkAction       *action,
+                         gpointer data)
 {
   if(state==IDLE)
     {
@@ -331,22 +331,21 @@ static void bonobo_download(BonoboUIComponent *component, gpointer data,
     }
 }
 
-static void bonobo_cancel_download(BonoboUIComponent *component, gpointer data,
-				   const char *name)
+static void bonobo_cancel_download(GtkAction       *action,
+                         gpointer data)
 {
   if(state==DOWNLOADING || state==UPDATING)
     write_msgid(to_slave, APPLET_CMD_ABORT_DOWNLOAD);
 }
 
-static const BonoboUIVerb my_verbs[]={
-  BONOBO_UI_VERB("UpdateNow", bonobo_update),
-  BONOBO_UI_VERB("Start", bonobo_start),
-  BONOBO_UI_VERB("Preferences", bonobo_prefs),
-  BONOBO_UI_VERB("About", bonobo_about),
-  BONOBO_UI_VERB("PkgManager", bonobo_package_manager),
-  BONOBO_UI_VERB("Download", bonobo_download),
-  BONOBO_UI_VERB("CancelDownload", bonobo_cancel_download),
-  BONOBO_UI_VERB_END
+static const GtkActionEntry my_verbs[]={
+    { "UpdateNow", NULL, N_("_UpdateNow"), NULL, NULL, G_CALLBACK (bonobo_update)},
+    { "Start", NULL, N_("_Start"), NULL, NULL, G_CALLBACK (bonobo_start)},
+    { "Preferences", NULL, N_("_Preferences"), NULL, NULL, G_CALLBACK (bonobo_prefs)},
+    { "About", GTK_STOCK_ABOUT, N_("_About"), NULL, NULL, G_CALLBACK (bonobo_about) },
+    { "PkgManager", NULL, N_("Pkg_Manager"), NULL, NULL, G_CALLBACK (bonobo_package_manager)},
+    { "Download", NULL, N_("_Download"), NULL, NULL, G_CALLBACK (bonobo_download)},
+    { "CancelDownload", NULL, N_("_CancelDownload"), NULL, NULL, G_CALLBACK (bonobo_cancel_download)},
 };
 
 const char my_menu[]=
@@ -363,24 +362,26 @@ const char my_menu[]=
 // Wrapper around the nastiness that is the Gnome API
 //
 // (actually I'm just bitter that a really simple operation took me 5
-// hours to figure out)
+// hours to figure but)
 static void set_menu_sensitive(PanelApplet *applet,
 			       const string &item, bool sensitive)
 {
-  BonoboUIComponent *popup = panel_applet_get_popup_component(applet);
+    /* GtkActionGroup *popup = panel_applet_get_popup_component(applet); */
 
-  bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "sensitive",
-			       sensitive?"1":"0", NULL);
+  /* TODO TODO TODO
+    bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "sensitive",
+      sensitive?"1":"0", NULL); */
 }
 
 // Similarly
 static void set_menu_hidden(PanelApplet *applet,
 			    const string &item, bool hidden)
 {
-  BonoboUIComponent *popup = panel_applet_get_popup_component(applet);
+    /*  GtkActionGroup *popup = panel_applet_get_popup_component(applet); */
 
-  bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "hidden",
-			       hidden?"1":"0", NULL);
+  /* TODO TODO TODO
+    bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "hidden",
+     hidden?"1":"0", NULL); */
 }
 
 static void set_state(applet_state new_state,
@@ -465,7 +466,7 @@ static void set_state(applet_state new_state,
       msg=buf;
     }
 
-  gtk_tooltips_set_tip(tooltips, ebox, msg.c_str(), "");
+  gtk_widget_set_tooltip_text (ebox, msg.c_str());
 
   if((state==IDLE) &&
      pending_update)
@@ -568,8 +569,10 @@ report_failed_grab (const char *what)
 			       "A malicious client may be eavesdropping "
 			       "on your session.", what);
   gtk_window_set_position(GTK_WINDOW(err), GTK_WIN_POS_CENTER);
-  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(err))->label),
+  /* TODO TODO TODO
+     gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(err))->label),
 			  TRUE);
+  */
 
   gtk_dialog_run(GTK_DIALOG(err));
 
@@ -591,7 +594,8 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   GtkWidget *dialog, *entry;
   GdkGrabStatus status;
-
+  return -1;
+  
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
 				  GTK_MESSAGE_QUESTION,
 				  GTK_BUTTONS_OK_CANCEL,
@@ -599,8 +603,10 @@ static int ask_for_auth_info(const string &msg, bool echo)
 				  msg.c_str());
 
   entry = gtk_entry_new();
+  /* TODO TODO TODO
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), entry, FALSE, 
 		     FALSE, 0);
+  */
   if(!echo)
     gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
   gtk_widget_grab_focus(entry);
@@ -608,8 +614,10 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   gtk_window_set_title(GTK_WINDOW(dialog), "Upgrade notification");
   gtk_window_set_position (GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dialog))->label),
+  /* TODO TODO TODO
+     gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dialog))->label),
 			  TRUE);
+  */
 
   /* Make <enter> close dialog */
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
@@ -618,8 +626,10 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   /* Grab focus */
   gtk_widget_show_now(dialog);
+  /* TODO TODO TODO
   status = gdk_keyboard_grab((GTK_WIDGET(dialog))->window, FALSE,
 			     GDK_CURRENT_TIME);
+  */
   if (status != GDK_GRAB_SUCCESS)
     {
       failed = "keyboard";
@@ -966,8 +976,10 @@ static gboolean handle_slave_msg(GIOChannel *source,
 				     s.c_str());
 
 	  gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+      /* TODO TODO TODO
 	  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
 				  TRUE);
+      */
 
 	  gtk_dialog_run(GTK_DIALOG(dlg));
 
@@ -1004,8 +1016,10 @@ static gboolean handle_slave_msg(GIOChannel *source,
 				     msgtype);
 
 	  gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+      /* TODO TODO TODO
 	  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
 				  TRUE);
+      */
 
 	  gtk_dialog_run(GTK_DIALOG(dlg));
 
@@ -1046,8 +1060,10 @@ static void run_error_dlg(const char *message)
 					message);
 
   gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+  /* TODO TODO TODO
   gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
 			  TRUE);
+  */
 
   gtk_dialog_run(GTK_DIALOG(dlg));
 
@@ -1175,6 +1191,7 @@ apt_watch_applet_fill (PanelApplet *applet,
 		       const gchar *iid,
 		       gpointer     data)
 {
+  GtkActionGroup *action_group;
   start_log();
 
   munge_path();
@@ -1186,16 +1203,17 @@ apt_watch_applet_fill (PanelApplet *applet,
 
   signal(SIGPIPE, SIG_IGN);
 
-  if (strcmp (iid, "OAFIID:Apt_WatchApplet") != 0)
+  if (strcmp (iid, "Apt_WatchApplet") != 0)
     return FALSE;
 
-  panel_applet_setup_menu(applet, my_menu, my_verbs, applet);
+  action_group = gtk_action_group_new("Apt-Watch Applet Actions");
+  gtk_action_group_add_actions(action_group, my_verbs, G_N_ELEMENTS(my_verbs), data);
+  panel_applet_setup_menu(applet, my_menu, action_group);
+  g_object_unref(action_group);
 
   ebox=gtk_event_box_new();
   g_signal_connect(G_OBJECT(ebox), "button-press-event",
 		   (GCallback) applet_button_pressed, applet);
-
-  tooltips=gtk_tooltips_new();
 
   GError *err=NULL;
   static_swirl=gdk_pixbuf_new_from_file(DATADIR "/apt-watch/pixmaps/gnome-debian-small.png", &err);
@@ -1245,10 +1263,7 @@ apt_watch_applet_fill (PanelApplet *applet,
   return TRUE;
 }
 
-
-PANEL_APPLET_BONOBO_FACTORY ("OAFIID:Apt_WatchApplet_Factory",
-                             PANEL_TYPE_APPLET,
-                             "Watch for upgrades",
-                             "0",
-                             apt_watch_applet_fill,
-                             NULL);
+PANEL_APPLET_OUT_PROCESS_FACTORY ( "Apt_WatchApplet_Factory",
+                                   PANEL_TYPE_APPLET,
+                                   apt_watch_applet_fill,
+                                   NULL);
