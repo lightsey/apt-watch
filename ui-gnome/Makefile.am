@@ -25,10 +25,10 @@ org.gnome.panel.Apt_Watch.panel-applet: $(applet_in_files)
 
 ## Dbus service conf installation
 servicedir       = $(datadir)/dbus-1/services
-service_in_files = org.gnome.panel.applet.Apt_WatchFactory.service.in
+service_in_files = org.gnome.panel.applet.Apt_WatchApplet_Factory.service.in
 service_DATA     = $(service_in_files:.service.in=.service)
 
-org.gnome.panel.applet.Apt_WatchFactory.service: $(service_in_files)
+org.gnome.panel.applet.Apt_WatchApplet_Factory.service: $(service_in_files)
 	$(AM_V_GEN)sed \
 	-e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
 	-e "s|\@VERSION\@|$(PACKAGE_VERSION)|" \
