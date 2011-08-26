@@ -209,23 +209,23 @@ void setup_update_timeout(PanelApplet *applet)
 
   CheckFreq freq=get_check_freq(applet);
 
+  GError *err=NULL;
+
+  string key=string(panel_applet_get_preferences_key(applet))+"/check/last_check";
+
+  last_timeout=gconf_client_get_int(confclient,
+                                    key.c_str(),
+                                    &err);
+  last_tm = localtime(&last_timeout);
+  if(err!=NULL)
+  {
+    last_timeout=0;
+    g_error_free(err);
+    err=NULL;
+  }
+
   if(freq!=CHECK_NEVER)
     {
-      GError *err=NULL;
-
-      string key=string(panel_applet_get_preferences_key(applet))+"/check/last_check";
-
-      last_timeout=gconf_client_get_int(confclient,
-					       key.c_str(),
-					       &err);
-      last_tm = localtime(&last_timeout);
-      if(err!=NULL)
-	{
-	  last_timeout=0;
-	  g_error_free(err);
-	  err=NULL;
-	}
-
       time_t next_timeout=last_timeout+(freq==CHECK_WEEKLY?7:1)*24*60*60;
 
       time_t curtime=time(0);
