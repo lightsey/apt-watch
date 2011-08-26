@@ -339,23 +339,23 @@ static void bonobo_cancel_download(GtkAction       *action,
 }
 
 static const GtkActionEntry my_verbs[]={
-    { "UpdateNow", NULL, N_("_UpdateNow"), NULL, NULL, G_CALLBACK (bonobo_update)},
     { "Start", NULL, N_("_Start"), NULL, NULL, G_CALLBACK (bonobo_start)},
-    { "Preferences", NULL, N_("_Preferences"), NULL, NULL, G_CALLBACK (bonobo_prefs)},
-    { "About", GTK_STOCK_ABOUT, N_("_About"), NULL, NULL, G_CALLBACK (bonobo_about) },
-    { "PkgManager", NULL, N_("Pkg_Manager"), NULL, NULL, G_CALLBACK (bonobo_package_manager)},
+    { "UpdateNow", NULL, N_("_Update Now"), NULL, NULL, G_CALLBACK (bonobo_update)},
+    { "PkgManager", NULL, N_("Open Package _Manager"), NULL, NULL, G_CALLBACK (bonobo_package_manager)},
     { "Download", NULL, N_("_Download"), NULL, NULL, G_CALLBACK (bonobo_download)},
-    { "CancelDownload", NULL, N_("_CancelDownload"), NULL, NULL, G_CALLBACK (bonobo_cancel_download)},
+    { "CancelDownload", NULL, N_("_Cancel Download"), NULL, NULL, G_CALLBACK (bonobo_cancel_download)},
+    { "Preferences", NULL, N_("_Preferences"), NULL, NULL, G_CALLBACK (bonobo_prefs)},
+    { "About", GTK_STOCK_ABOUT, N_("_About"), NULL, NULL, G_CALLBACK (bonobo_about) }
 };
 
 const char my_menu[]=
-    "<menuitem name=\"Start\" action=\"Start\" />"
-    "<menuitem name=\"UpdateNow\" action=\"UpdateNow\" />"
-    "<menuitem name=\"PkgManager\" action=\"PkgManager\" />"
-    "<menuitem name=\"Download\" action=\"Download\" />"
-    "<menuitem name=\"CancelDownload\" action=\"CancelDownload\" />"
-    "<menuitem name=\"Preferences\" action=\"Preferences\" />"
-    "<menuitem name=\"About\" action=\"About\" />";
+    "<menuitem name=\"_Start\" action=\"Start\" />"
+    "<menuitem name=\"_Update Now\" action=\"UpdateNow\" />"
+    "<menuitem name=\"Open Package _Manager\" action=\"PkgManager\" />"
+    "<menuitem name=\"_Download\" action=\"Download\" />"
+    "<menuitem name=\"_Cancel Download\" action=\"CancelDownload\" />"
+    "<menuitem name=\"_Preferences\" action=\"Preferences\" />"
+    "<menuitem name=\"_About\" action=\"About\" />";
 
 // Wrapper around the nastiness that is the Gnome API
 //
@@ -1205,7 +1205,7 @@ apt_watch_applet_fill (PanelApplet *applet,
     return FALSE;
 
   action_group = gtk_action_group_new("Apt-Watch Applet Actions");
-  gtk_action_group_add_actions(action_group, my_verbs, G_N_ELEMENTS(my_verbs), data);
+  gtk_action_group_add_actions(action_group, my_verbs, G_N_ELEMENTS(my_verbs), applet);
   panel_applet_setup_menu(applet, my_menu, action_group);
   g_object_unref(action_group);
 
