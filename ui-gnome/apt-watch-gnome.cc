@@ -349,15 +349,13 @@ static const GtkActionEntry my_verbs[]={
 };
 
 const char my_menu[]=
-"<popup name=\"button3\">"
-  "<menuitem name=\"Start\" verb=\"Start\" _label=\"_Start watching for upgrades\"/>"
-  "<menuitem name=\"UpdateNow\" verb=\"UpdateNow\" _label=\"Check for _upgrades\" pixname=\"gtk-search\"/>"
-  "<menuitem name=\"PkgManager\" verb=\"PkgManager\" _label=\"Run package manager\" pixname=\"gtk-go-right\"/>"
-  "<menuitem name=\"Download\" verb=\"Download\" _label=\"Download all upgrades\" pixname=\"gtk-go-down\"/>"
-  "<menuitem name=\"CancelDownload\" verb=\"CancelDownload\" _label=\"Cancel download\" pixname=\"gtk-stop\"/>"
-  "<menuitem name=\"Preferences\" verb=\"Preferences\" _label=\"_Preferences...\" pixtype=\"stock\" pixname=\"gtk-preferences\"/>"
-  "<menuitem name=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gnome-stock-about\"/>"
-  "</popup>";
+    "<menuitem name=\"Start\" action=\"Start\" />"
+    "<menuitem name=\"UpdateNow\" action=\"UpdateNow\" />"
+    "<menuitem name=\"PkgManager\" action=\"PkgManager\" />"
+    "<menuitem name=\"Download\" action=\"Download\" />"
+    "<menuitem name=\"CancelDownload\" action=\"CancelDownload\" />"
+    "<menuitem name=\"Preferences\" action=\"Preferences\" />"
+    "<menuitem name=\"About\" action=\"About\" />";
 
 // Wrapper around the nastiness that is the Gnome API
 //
