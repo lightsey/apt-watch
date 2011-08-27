@@ -70,6 +70,10 @@ guint from_slave_input;
 // Stores the timeout for the update.
 guint update_timeout;
 
+// Menu action group
+GtkActionGroup *menu_action_group;
+
+
 static gboolean do_update(gpointer data);
 static gboolean do_update_timeout(gpointer data);
 static gboolean do_reload(gpointer data);
@@ -339,47 +343,46 @@ static void bonobo_cancel_download(GtkAction       *action,
 }
 
 static const GtkActionEntry my_verbs[]={
-    { "Start", NULL, N_("_Start"), NULL, NULL, G_CALLBACK (bonobo_start)},
-    { "UpdateNow", NULL, N_("_Update Now"), NULL, NULL, G_CALLBACK (bonobo_update)},
-    { "PkgManager", NULL, N_("Open Package _Manager"), NULL, NULL, G_CALLBACK (bonobo_package_manager)},
-    { "Download", NULL, N_("_Download"), NULL, NULL, G_CALLBACK (bonobo_download)},
-    { "CancelDownload", NULL, N_("_Cancel Download"), NULL, NULL, G_CALLBACK (bonobo_cancel_download)},
-    { "Preferences", NULL, N_("_Preferences"), NULL, NULL, G_CALLBACK (bonobo_prefs)},
-    { "About", GTK_STOCK_ABOUT, N_("_About"), NULL, NULL, G_CALLBACK (bonobo_about) }
+    { "Start", NULL, N_("Start"), NULL, NULL, G_CALLBACK (bonobo_start)},
+    { "UpdateNow", NULL, N_("Update Now"), NULL, NULL, G_CALLBACK (bonobo_update)},
+    { "PkgManager", NULL, N_("Open Package Manager"), NULL, NULL, G_CALLBACK (bonobo_package_manager)},
+    { "Download", NULL, N_("Download"), NULL, NULL, G_CALLBACK (bonobo_download)},
+    { "CancelDownload", NULL, N_("Cancel Download"), NULL, NULL, G_CALLBACK (bonobo_cancel_download)},
+    { "Preferences", NULL, N_("Preferences"), NULL, NULL, G_CALLBACK (bonobo_prefs)},
+    { "About", GTK_STOCK_ABOUT, N_("About"), NULL, NULL, G_CALLBACK (bonobo_about) }
 };
 
 const char my_menu[]=
-    "<menuitem name=\"_Start\" action=\"Start\" />"
-    "<menuitem name=\"_Update Now\" action=\"UpdateNow\" />"
-    "<menuitem name=\"Open Package _Manager\" action=\"PkgManager\" />"
-    "<menuitem name=\"_Download\" action=\"Download\" />"
-    "<menuitem name=\"_Cancel Download\" action=\"CancelDownload\" />"
-    "<menuitem name=\"_Preferences\" action=\"Preferences\" />"
-    "<menuitem name=\"_About\" action=\"About\" />";
+    "<menuitem name=\"Start\" action=\"Start\" />"
+    "<menuitem name=\"Update Now\" action=\"UpdateNow\" />"
+    "<menuitem name=\"Open Package Manager\" action=\"PkgManager\" />"
+    "<menuitem name=\"Download\" action=\"Download\" />"
+    "<menuitem name=\"Cancel Download\" action=\"CancelDownload\" />"
+    "<menuitem name=\"Preferences\" action=\"Preferences\" />"
+    "<menuitem name=\"About\" action=\"About\" />";
 
-// Wrapper around the nastiness that is the Gnome API
-//
-// (actually I'm just bitter that a really simple operation took me 5
-// hours to figure but)
 static void set_menu_sensitive(PanelApplet *applet,
 			       const string &item, bool sensitive)
 {
-    /* GtkActionGroup *popup = panel_applet_get_popup_component(applet); */
-
-  /* TODO TODO TODO
-    bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "sensitive",
-      sensitive?"1":"0", NULL); */
+    GtkAction *selected_action = gtk_action_group_get_action(menu_action_group, item.c_str());
+    if (selected_action != NULL) {
+        gtk_action_set_sensitive(selected_action, sensitive);
+    }
+    else {
+        do_log("Failed to find GtkAction %s for set_menu_sensitive()", item.c_str());
+    }
 }
 
-// Similarly
-static void set_menu_hidden(PanelApplet *applet,
-			    const string &item, bool hidden)
+static void set_menu_visible(PanelApplet *applet,
+			    const string &item, bool visible)
 {
-    /*  GtkActionGroup *popup = panel_applet_get_popup_component(applet); */
-
-  /* TODO TODO TODO
-    bonobo_ui_component_set_prop(popup, ("/commands/"+item).c_str(), "hidden",
-     hidden?"1":"0", NULL); */
+    GtkAction *selected_action = gtk_action_group_get_action(menu_action_group, item.c_str());
+    if (selected_action != NULL) {
+        gtk_action_set_visible(selected_action, visible);
+    }
+    else {
+        do_log("Failed to find GtkAction %s for set_menu_visible()", item.c_str());
+    }
 }
 
 static void set_state(applet_state new_state,
@@ -480,8 +483,8 @@ static void set_state(applet_state new_state,
       do_reload(applet);
     }
 
-  set_menu_hidden(applet, "Start", state!=NEED_SLAVE_START);
-  set_menu_hidden(applet, "CancelDownload", !(state==DOWNLOADING || state==UPDATING));
+  set_menu_visible(applet, "Start", state==NEED_SLAVE_START);
+  set_menu_visible(applet, "CancelDownload", (state==DOWNLOADING || state==UPDATING));
 
   set_menu_sensitive(applet, "UpdateNow", state==IDLE);
   set_menu_sensitive(applet, "Download", state==IDLE);
@@ -1189,7 +1192,6 @@ apt_watch_applet_fill (PanelApplet *applet,
 		       const gchar *iid,
 		       gpointer     data)
 {
-  GtkActionGroup *action_group;
   start_log();
 
   munge_path();
@@ -1204,10 +1206,9 @@ apt_watch_applet_fill (PanelApplet *applet,
   if (strcmp (iid, "Apt_WatchApplet") != 0)
     return FALSE;
 
-  action_group = gtk_action_group_new("Apt-Watch Applet Actions");
-  gtk_action_group_add_actions(action_group, my_verbs, G_N_ELEMENTS(my_verbs), applet);
-  panel_applet_setup_menu(applet, my_menu, action_group);
-  g_object_unref(action_group);
+  menu_action_group = gtk_action_group_new("Apt-Watch Applet Actions");
+  gtk_action_group_add_actions(menu_action_group, my_verbs, G_N_ELEMENTS(my_verbs), applet);
+  panel_applet_setup_menu(applet, my_menu, menu_action_group);
 
   ebox=gtk_event_box_new();
   g_signal_connect(G_OBJECT(ebox), "button-press-event",
