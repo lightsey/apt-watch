@@ -96,19 +96,16 @@ static void start_log()
 
   if(log==NULL)
     {
-      gchar *message=g_strdup_printf("Couldn't open the debugging log file %s!",
-				     fn);
-
       GtkWidget *dlg=gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
 					    GTK_MESSAGE_ERROR,
 					    GTK_BUTTONS_CLOSE,
-					    message);
+                        "Couldn't open the debugging log file %s!",
+					    fn);
 
       gtk_dialog_run(GTK_DIALOG(dlg));
 
       gtk_widget_destroy(dlg);
 
-      g_free(message);
     }
 
   g_free(fn);
@@ -1039,7 +1036,8 @@ static void run_error_dlg(const char *message)
   GtkWidget *dlg=gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
 					GTK_MESSAGE_ERROR,
 					GTK_BUTTONS_CLOSE,
-					message);
+                    "%s",
+                    message);
 
   gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
 
