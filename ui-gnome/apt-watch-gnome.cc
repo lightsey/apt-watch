@@ -570,10 +570,6 @@ report_failed_grab (const char *what)
 			       "A malicious client may be eavesdropping "
 			       "on your session.", what);
   gtk_window_set_position(GTK_WINDOW(err), GTK_WIN_POS_CENTER);
-  /* TODO TODO TODO
-     gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(err))->label),
-			  TRUE);
-  */
 
   gtk_dialog_run(GTK_DIALOG(err));
 
@@ -595,8 +591,7 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   GtkWidget *dialog, *entry;
   GdkGrabStatus status;
-  return -1;
-  
+
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
 				  GTK_MESSAGE_QUESTION,
 				  GTK_BUTTONS_OK_CANCEL,
@@ -604,10 +599,8 @@ static int ask_for_auth_info(const string &msg, bool echo)
 				  msg.c_str());
 
   entry = gtk_entry_new();
-  /* TODO TODO TODO
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), entry, FALSE, 
+  gtk_box_pack_start(GTK_BOX(gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(dialog))), entry, FALSE,
 		     FALSE, 0);
-  */
   if(!echo)
     gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
   gtk_widget_grab_focus(entry);
@@ -615,10 +608,6 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   gtk_window_set_title(GTK_WINDOW(dialog), "Upgrade notification");
   gtk_window_set_position (GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  /* TODO TODO TODO
-     gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dialog))->label),
-			  TRUE);
-  */
 
   /* Make <enter> close dialog */
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
@@ -627,10 +616,10 @@ static int ask_for_auth_info(const string &msg, bool echo)
 
   /* Grab focus */
   gtk_widget_show_now(dialog);
-  /* TODO TODO TODO
-  status = gdk_keyboard_grab((GTK_WIDGET(dialog))->window, FALSE,
+
+  status = gdk_keyboard_grab(gtk_widget_get_parent_window(dialog), FALSE,
 			     GDK_CURRENT_TIME);
-  */
+
   if (status != GDK_GRAB_SUCCESS)
     {
       failed = "keyboard";
@@ -977,10 +966,6 @@ static gboolean handle_slave_msg(GIOChannel *source,
 				     s.c_str());
 
 	  gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
-      /* TODO TODO TODO
-	  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
-				  TRUE);
-      */
 
 	  gtk_dialog_run(GTK_DIALOG(dlg));
 
@@ -1017,10 +1002,6 @@ static gboolean handle_slave_msg(GIOChannel *source,
 				     msgtype);
 
 	  gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
-      /* TODO TODO TODO
-	  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
-				  TRUE);
-      */
 
 	  gtk_dialog_run(GTK_DIALOG(dlg));
 
@@ -1061,10 +1042,6 @@ static void run_error_dlg(const char *message)
 					message);
 
   gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
-  /* TODO TODO TODO
-  gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dlg))->label),
-			  TRUE);
-  */
 
   gtk_dialog_run(GTK_DIALOG(dlg));
 
