@@ -1,1 +1,47 @@
-No changelog yet.
+[08/27/2011]
+Version 0.4.0
+  * Updated for libpanel-applet-4 (Gnome Panel 3)
+
+  * Numerous compatibility fixes for Gnome 3 support.
+
+  * Fix crash when update frequency was set to never.
+
+[03/19/2011]
+Version 0.3.3
+  * Switch from Glade to GtkBuilder.
+
+  * Remove deprecated libapt-pkg methods.
+
+  * Remove deprecated Gnome classes in preparation for Gnome 3.
+
+  * Import all fixes from Debian package.
+
+[05/05/2004]
+Version 0.3.2 "Fixer-upper"
+  * The program works now even if FAM is not available.
+
+  * Improvements to the use of PAM in the slave.
+
+  * Better error handling: more errors will be reported to the user, and
+    useless assertion failures are no longer dumped to stderr.
+
+[03/18/2004]
+Version 0.3.1 "Shrinkage"
+  * One of the icons in 0.3 was much larger than the others; fixed.
+    (eventually the icons will autoscale to the panel size, but that's
+     a project for another day)
+
+[03/18/2004]
+Version 0.3 "Icons for everyone!"
+  * The major change in this release is that the ugly text and progress
+    bar have been replaced by ugly icons.
+
+  * If upgrades require some new packages to be installed, apt-watch will
+    detect the new packages and download them as well.  (it will miss
+    Recommended packages for the time being, though)
+
+[02/29/2004]
+Version 0.2 "Waiting for svn.debian.org"
+  * Initial public release.  The program seems to be basically
+    functional, although I have a ~1000 line patch to commit to svn.d.o
+    when it comes back to life.
