@@ -49,7 +49,7 @@ static package_manager hardcoded_package_managers[] = {
 
 static int get_package_manager_enum_loc(PanelApplet * applet)
 {
-    gint rval = PM_UNSET;
+    gint rval = PM_SYNAPTIC;
 
     string key = string(panel_applet_get_preferences_key(applet)) + "/package_manager/package_manager";
 
@@ -66,6 +66,7 @@ static int get_package_manager_enum_loc(PanelApplet * applet)
         for (int i = 0; package_manager_lookup_table[i].str; ++i)
             if (!strcmp(package_manager_lookup_table[i].str, stringval)) {
                 rval = i;
+
                 break;
             }
     } else {
@@ -85,10 +86,7 @@ static int get_package_manager_enum(PanelApplet * applet)
 {
     int loc = get_package_manager_enum_loc(applet);
 
-    if (loc < 0)
-        return PM_UNSET;
-    else
-        return package_manager_lookup_table[loc].enum_value;
+    return package_manager_lookup_table[loc].enum_value;
 }
 
 const package_manager *get_package_manager(PanelApplet * applet)
@@ -369,6 +367,7 @@ void init_preferences_package_manager(PanelApplet * applet, GtkBuilder * builder
         if (pair->enum_value != -1 && !in_path(pair->str))
             visible = false;
 
+
         gtk_list_store_set(menu, &iter, 0, capitalized.c_str(), 1, visible, 2, pair->enum_value, -1);
 
         if (pair->enum_value == curr_enum_value)
@@ -381,7 +380,9 @@ void init_preferences_package_manager(PanelApplet * applet, GtkBuilder * builder
     GtkCellRenderer *cell = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(optionmenu), cell, TRUE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(optionmenu), cell, "text", 0, "sensitive", 1, NULL);
-    g_object_unref(G_OBJECT(cell));
+
+    // This causes the menu to stop rendering with newer GTK versions
+    //g_object_unref(G_OBJECT(cell));
 
     gtk_combo_box_set_active_iter(optionmenu, &active);
 
